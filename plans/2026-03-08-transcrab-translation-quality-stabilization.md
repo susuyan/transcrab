@@ -23,10 +23,20 @@
 - 保留 legacy prompt 开关，确保可快速回滚。
 
 **Acceptance / Verification:**
-- 基准集（10 篇）重复执行 3 次：评分方差显著下降。
+- 基准集（当前阶段先 3 篇）重复执行时输出结构稳定，后续再扩到 10 篇。
 - Markdown 结构错误率接近 0（强调符号、标题层级、代码块、链接）。
 - 术语一致性明显改善（同词不再多译）。
-- 旧工作流可通过开关回退，且不影响现有 URL + crab 主路径。
+- refined 发布闭环可执行（draft → critique → revision → final）。
+
+## Scope decisions (applied)
+
+> 以下是实施过程中经 onevcat 确认后的“有意调整”，作为当前计划基线。
+
+1) **发布默认质量优先**：`mode=auto` 下发布流程固定为 `refined`，不再在 quick/normal/refined 间切换。
+2) **自动化重心调整**：自动化从“档位选择”转为“主题识别（technology/business/life）→ 风格/受众映射”。
+3) **基线样本分阶段推进**：先落地 3 篇已翻译样本进入 fixtures，后续按需要扩展到 10 篇。
+4) **`translate.<lang>.prompt.txt` 的定位**：这是兼容性产物路径，不是语言控制开关；真正控制项在 profile（mode/style/audience）。
+5) **legacy prompt 开关**：本轮未实现，后续若确有回滚诉求再单独立项。
 
 ## Milestones
 
