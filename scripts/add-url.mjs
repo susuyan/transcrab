@@ -9,6 +9,9 @@ import { gfm } from 'turndown-plugin-gfm';
 import matter from 'gray-matter';
 import slugify from 'slugify';
 import { fetch } from 'undici';
+import { loadTranslateConfig } from './lib/translate-config.mjs';
+import { getPipelineSteps, materializePipelineArtifacts, resolveExecutionMode } from './translate-orchestrator.mjs';
+import { inferAutoProfile } from './lib/auto-profile.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,7 +22,7 @@ const CONTENT_ROOT = process.env.TRANSCRAB_CONTENT_ROOT
 
 function usage() {
   console.log(`Usage:
-  node scripts/add-url.mjs <url> [--lang zh]
+  node scripts/add-url.mjs <url> [--lang zh] [--mode auto|quick|normal|refined] [--audience <name>] [--style <name>] [--config <path>]
 
 Notes:
   - Fetches HTML, extracts main article (Readability), converts to Markdown (Turndown)
@@ -42,6 +45,10 @@ if (args.length === 0 || args.includes('-h') || args.includes('--help')) {
 
 const url = args[0];
 const lang = argValue(args, '--lang', 'zh');
+const mode = argValue(args, '--mode', null);
+const audience = argValue(args, '--audience', null);
+const style = argValue(args, '--style', null);
+const configPath = argValue(args, '--config', null);
 
 await fs.mkdir(CONTENT_ROOT, { recursive: true });
 
@@ -61,18 +68,85 @@ const sourceFrontmatter = {
 const sourceMd = matter.stringify(markdown, sourceFrontmatter);
 await fs.writeFile(path.join(dir, 'source.md'), sourceMd, 'utf-8');
 
+const { config: configuredProfile, loadedFromFile, configPath: resolvedConfigPath } = await loadTranslateConfig({
+  cwd: ROOT,
+  configPath,
+  cli: {
+    mode,
+    audience,
+    style,
+  },
+});
+
+const autoProfile = configuredProfile.mode === 'auto'
+  ? inferAutoProfile(markdown, configuredProfile)
+  : null;
+
+const translationProfile = autoProfile
+  ? {
+      ...configuredProfile,
+      ...autoProfile.resolved,
+      mode: 'auto',
+    }
+  : configuredProfile;
+
+const steps = getPipelineSteps(configuredProfile.mode);
+const executionMode = resolveExecutionMode(configuredProfile, autoProfile);
+
 const meta = {
   slug,
   title: title || slug,
   date,
   sourceUrl: url,
   targetLang: lang,
+  translationProfile: {
+    mode: translationProfile.mode,
+    audience: translationProfile.audience,
+    style: translationProfile.style,
+    steps,
+    executionMode,
+    autoProfile,
+  },
 };
 await fs.writeFile(path.join(dir, 'meta.json'), JSON.stringify(meta, null, 2) + '\n', 'utf-8');
 
-const prompt = buildTranslatePrompt(markdown, lang);
 const promptPath = path.join(dir, `translate.${lang}.prompt.txt`);
-await fs.writeFile(promptPath, prompt + '\n', 'utf-8');
+const materialized = await materializePipelineArtifacts({
+  outputDir: dir,
+  markdown,
+  lang,
+  profile: {
+    ...translationProfile,
+    steps,
+  },
+  autoProfile,
+  sourceTitle: title || slug,
+  sourceUrl: url,
+});
+
+const prompt = await fs.readFile(materialized.artifacts.assembledPrompt, 'utf8');
+await fs.writeFile(promptPath, prompt.trimEnd() + '\n', 'utf-8');
+
+await fs.writeFile(
+  path.join(dir, 'translation.profile.json'),
+  JSON.stringify(
+    {
+      profile: translationProfile,
+      configuredProfile,
+      autoProfile,
+      steps,
+      executionMode,
+      executionSteps: materialized.executionSteps,
+      artifacts: materialized.artifacts,
+      createdFiles: materialized.createdFiles,
+      configPath: resolvedConfigPath,
+      loadedFromFile,
+    },
+    null,
+    2
+  ) + '\n',
+  'utf-8'
+);
 
 // Print a machine-readable summary for wrappers.
 // NOTE: yyyy/mm are derived from `date` (UTC), and match the site's canonical route:
@@ -93,6 +167,15 @@ console.log(
       yyyy,
       mm,
       articlePath,
+      translationProfile: {
+        ...translationProfile,
+        steps,
+        executionMode,
+        executionSteps: materialized.executionSteps,
+        autoProfile,
+      },
+      profilePath: path.join(dir, 'translation.profile.json'),
+      pipelineFiles: materialized.createdFiles,
       nextSteps: [
         `Translate: read ${promptPath} and translate to ${lang} (H1 title + blank line + body)`,
         `Apply: node scripts/apply-translation.mjs ${slug} --lang ${lang} --in /path/to/translated.${lang}.md`,
@@ -735,19 +818,3 @@ async function makeUniqueSlugDir(baseSlug) {
   return { slug, dir };
 }
 
-function buildTranslatePrompt(md, targetLang) {
-  const langName = targetLang === 'zh' ? '简体中文' : targetLang;
-  return [
-    `你是一个翻译助手。请把下面的 Markdown 内容翻译成${langName}。`,
-    `要求：`,
-    `- 保留 Markdown 结构（标题/列表/引用/表格/链接）。`,
-    `- 代码块、命令、URL、文件路径保持原样，不要翻译。`,
-    `- 术语以忠实原意为主，但整体表达要通顺自然（约 6/4：忠实/顺畅）。`,
-    `- **必须同时翻译标题**：请先输出一行 Markdown 一级标题（以 "# " 开头），作为译文标题。`,
-    `- 然后空一行，再输出译文正文（不要再重复标题）。`,
-    `- 只输出翻译结果本身，不要附加解释、不要加前后缀。`,
-    ``,
-    `---`,
-    md,
-  ].join('\n');
-}
