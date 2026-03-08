@@ -1,0 +1,35 @@
+[
+  {
+    "id": "unit-tests-for-ai-agent-skills",
+    "title": "Unit Tests for AI Agent Skills",
+    "url": "https://blog.mgechev.com/2026/02/26/skill-eval/",
+    "domain": "tech",
+    "lengthBand": "short",
+    "hasCode": true,
+    "hasTable": false,
+    "hasComplexEmphasis": true,
+    "notes": "已在 private 仓库完成翻译，短文 + 代码块，适合做 quick/normal 基线对比"
+  },
+  {
+    "id": "anthropic-and-alignment",
+    "title": "Anthropic and Alignment",
+    "url": "https://stratechery.com/2026/anthropic-and-alignment/",
+    "domain": "analysis",
+    "lengthBand": "medium",
+    "hasCode": false,
+    "hasTable": false,
+    "hasComplexEmphasis": true,
+    "notes": "已在 private 仓库完成翻译，长段落叙事类，适合观察文风与语义忠实度"
+  },
+  {
+    "id": "do-you-need-an-mcp-to-build-your-native-app-sentry-engineering",
+    "title": "Do you need an MCP to build your native app?",
+    "url": "https://sentry.engineering/blog/do-you-really-need-an-mcp-to-build-your-app",
+    "domain": "tech",
+    "lengthBand": "medium",
+    "hasCode": true,
+    "hasTable": true,
+    "hasComplexEmphasis": true,
+    "notes": "已在 private 仓库完成翻译，含代码/表格/术语密集，适合检验 Markdown 完整性"
+  }
+]

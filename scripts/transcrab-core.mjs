@@ -1,6 +1,7 @@
 import { Readability } from '@mozilla/readability';
 import TurndownService from 'turndown';
 import slugify from 'slugify';
+import { buildTranslatePrompt as buildProfiledTranslatePrompt } from './lib/translate-prompt.mjs';
 
 export function makeSlug(text) {
   const s = String(text || '').trim();
@@ -8,18 +9,8 @@ export function makeSlug(text) {
   return slugify(s, { lower: true, strict: true }) || 'untitled';
 }
 
-export function buildTranslatePrompt(markdown, lang = 'zh') {
-  return `你是一个翻译助手。请把下面的 Markdown 内容翻译成简体中文。
-要求：
-- 保留 Markdown 结构（标题/列表/引用/表格/链接）。
-- 代码块、命令、URL、文件路径保持原样，不要翻译。
-- 术语以忠实原意为主，但整体表达要通顺自然（约 6/4：忠实/顺畅）。
-- **必须同时翻译标题**：请先输出一行 Markdown 一级标题（以 "# " 开头），作为译文标题。
-- 然后空一行，再输出译文正文（不要再重复标题）。
-- 只输出翻译结果本身，不要附加解释、不要加前后缀。
-
----
-${String(markdown || '').trim()}`;
+export function buildTranslatePrompt(markdown, lang = 'zh', profile = {}) {
+  return buildProfiledTranslatePrompt(markdown, lang, profile);
 }
 
 export async function htmlToMarkdown(html, baseUrl) {
