@@ -1,0 +1,77 @@
+{
+  "profile": {
+    "mode": "auto",
+    "audience": "technical",
+    "style": "technical",
+    "chunkThreshold": 4000,
+    "chunkMaxWords": 5000,
+    "glossary": []
+  },
+  "configuredProfile": {
+    "mode": "auto",
+    "audience": "general",
+    "style": "storytelling",
+    "chunkThreshold": 4000,
+    "chunkMaxWords": 5000,
+    "glossary": []
+  },
+  "autoProfile": {
+    "requestedMode": "auto",
+    "topic": "technology",
+    "confidence": 0.52,
+    "resolved": {
+      "mode": "refined",
+      "style": "technical",
+      "audience": "technical",
+      "chunkThreshold": 4000,
+      "chunkMaxWords": 5000,
+      "glossary": []
+    },
+    "metrics": {
+      "words": 2007,
+      "codeBlocks": 0,
+      "tableRows": 0,
+      "headings": 8,
+      "links": 32,
+      "businessHits": 1,
+      "lifeHits": 0,
+      "isLong": false,
+      "isVeryLong": false,
+      "isTechnical": false
+    },
+    "reasons": [
+      "公开发布默认使用 refined 流程，优先质量与稳定性",
+      "主题信号不明显，回退到 technology"
+    ]
+  },
+  "steps": [
+    "auto-analyze",
+    "translate"
+  ],
+  "executionMode": "refined",
+  "executionSteps": [
+    "analyze",
+    "translate",
+    "review",
+    "revise"
+  ],
+  "artifacts": {
+    "analysis": "/Users/admin/Projects/transcrab-private/content/articles/compound-engineering-camp-every-step-from-scratch/01-analysis.md",
+    "assembledPrompt": "/Users/admin/Projects/transcrab-private/content/articles/compound-engineering-camp-every-step-from-scratch/02-prompt.md",
+    "draft": "/Users/admin/Projects/transcrab-private/content/articles/compound-engineering-camp-every-step-from-scratch/03-draft.md",
+    "critique": "/Users/admin/Projects/transcrab-private/content/articles/compound-engineering-camp-every-step-from-scratch/04-critique.md",
+    "revision": "/Users/admin/Projects/transcrab-private/content/articles/compound-engineering-camp-every-step-from-scratch/05-revision.md",
+    "final": "/Users/admin/Projects/transcrab-private/content/articles/compound-engineering-camp-every-step-from-scratch/translation.md"
+  },
+  "promptPath": "/Users/admin/Projects/transcrab-private/content/articles/compound-engineering-camp-every-step-from-scratch/translate.prompt.txt",
+  "promptCompatPath": "/Users/admin/Projects/transcrab-private/content/articles/compound-engineering-camp-every-step-from-scratch/translate.zh.prompt.txt",
+  "createdFiles": [
+    "/Users/admin/Projects/transcrab-private/content/articles/compound-engineering-camp-every-step-from-scratch/02-prompt.md",
+    "/Users/admin/Projects/transcrab-private/content/articles/compound-engineering-camp-every-step-from-scratch/01-analysis.md",
+    "/Users/admin/Projects/transcrab-private/content/articles/compound-engineering-camp-every-step-from-scratch/03-draft.md",
+    "/Users/admin/Projects/transcrab-private/content/articles/compound-engineering-camp-every-step-from-scratch/04-critique.md",
+    "/Users/admin/Projects/transcrab-private/content/articles/compound-engineering-camp-every-step-from-scratch/05-revision.md"
+  ],
+  "configPath": "/Users/admin/Projects/transcrab-private/transcrab.translate.config.json",
+  "loadedFromFile": true
+}
